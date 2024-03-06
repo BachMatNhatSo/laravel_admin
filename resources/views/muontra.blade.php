@@ -26,6 +26,18 @@
                                 </select>
                             </div>
                         </div>
+                        <div class="form-group row">
+                            <label for="inputSinhVien" class="col-sm-3 col-form-label">Ngày Mượn: </label>
+                            <div class="col-sm-9">
+                                <input type="date" id="ngaymuon" name="ngaymuon">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="inputSinhVien" class="col-sm-3 col-form-label">Ngày Trả: </label>
+                            <div class="col-sm-9">
+                                <input type="date" id="ngaytra" name="ngaytra">
+                            </div>
+                        </div>
                         {{-- <div class="form-group row">
                             <label for="inputPassword3" class="col-sm-3 col-form-label">Điện Thoại: </label>
                             <div class="col-sm-9">
@@ -62,6 +74,7 @@
                                 <td>Ngày Mượn</td>
                                 <td>Ngày Trả</td>
                                 <td>Tình Trạng</td>
+                                <td>Action</td>
                             </tr>
                         </thead>
                     </table>
@@ -94,51 +107,106 @@
                     }, {
                         data: 'tensach'
                     }, {
-                        data: 'ngaymuon'
+                        data: 'ngaymuon',
+                        render: function(data, type, row, meta) {
+                            if (data === null || data === '') {
+                                return ''; // Return an empty string if the date is null or empty
+                            }
+
+                            // Parse the date string to a Date object
+                            var date = new Date(data);
+
+                            // Extract day, month, and year components
+                            var day = date.getDate().toString().padStart(2, '0');
+                            var month = (date.getMonth() + 1).toString().padStart(2,
+                                '0'); // Adding 1 because months are zero-based
+                            var year = date.getFullYear();
+
+                            // Format the date in "dd/mm/yyyy" format
+                            var formattedDate = day + '/' + month + '/' + year;
+
+                            return formattedDate;
+                        }
                     }, {
-                        data: 'ngaytra'
+                        data: 'ngaytra',
+                        render: function(data, type, row, meta) {
+                            if (data === null || data === '') {
+                                return ''; // Return an empty string if the date is null or empty
+                            }
+
+                            // Parse the date string to a Date object
+                            var date = new Date(data);
+
+                            // Extract day, month, and year components
+                            var day = date.getDate().toString().padStart(2, '0');
+                            var month = (date.getMonth() + 1).toString().padStart(2,
+                                '0'); // Adding 1 because months are zero-based
+                            var year = date.getFullYear();
+
+                            // Format the date in "dd/mm/yyyy" format
+                            var formattedDate = day + '/' + month + '/' + year;
+
+                            return formattedDate;
+                        }
                     }, {
                         data: 'tinhtrang',
                         render: function(data, type, row, meta) {
                             if (data == 0) {
-                                return 'Chưa Trả';
-                            } else {
                                 return 'Đã Trả';
+                            } else {
+                                return 'Chưa Trả';
                             }
+                        }
+                    }, {
+                        data: null,
+                        render: function(data, type, row, meta) {
+                            return `<button class="btnUpdate" data-id="${row.id}" data-toggle="modal" data-target="#myModal">Update</button> 
+                            <button class="btnDelete" data-id="${row.id}">Delete</button>`;
                         }
                     }
 
                 ]
             });
 
-            $.ajax({
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                url: '/getIds',
-                type: 'GET',
-                success: function(data) {
-                    // Populate dropdown for Sinh Viên
-                    $('#sinhvien').append($('<option>').val('').text('Choose Sinh Viên'));
-                    // Populate dropdown for Sách
-                    $('#sach').append($('<option>').val('').text('Choose Sách'));
+            //
 
-                    data.jointable.forEach(function(item) {
-                        $('#sinhvien').append($('<option>').val(item.id).text(item
-                            .tensinhvien));
-                        $('#sach').append($('<option>').val(item.id).text(item.tensach));
-                    });
-                },
-                error: function(xhr, status, error) {
-                    console.error(error);
-                }
+
+
+            $.get('/getIds', function(response) {
+                var dropDownDataSV = response.dropDownDataSV;
+                var dropdownsv = $('#sinhvien');
+                $.each(dropDownDataSV, function(id, name) {
+                    dropdownsv.append($('<option></option>').val(id).text(name));
+                });
+
+                var dropDownDataSach = response.dropDownDataSach;
+                var dropdownSach = $('#sach');
+                $.each(dropDownDataSach, function(id, name) {
+                    dropdownSach.append($('<option></option>').val(id).text(name));
+                });
+
+                dropdownsv.on('change', function() {
+                    selectedIdsv = $(this).val(); // Assign value to the variable
+                    var selectedName = dropDownDataSV[selectedIdsv];
+                    console.log('selected sinh vien id:' + selectedIdsv);
+                    console.log('selected sinh vien name:' + selectedName);
+                });
+
+                dropdownSach.on('change', function() {
+                    selectedIdsach = $(this).val(); // Assign value to the variable
+                    var selectedName = dropDownDataSach[selectedIdsach];
+                    console.log('selected sach id:' + selectedIdsach);
+                    console.log('selected sach name:' + selectedName);
+                });
             });
-            $('#createBookForm').on('submit', function() {
+            $('#createBookForm').on('submit', function(event) {
+                event.preventDefault();
                 var formdata = {
-                    sinhvien: $('#sinhvien').val(),
-                    sach: $('#sach').val()
+                    id_sinhvien: selectedIdsv,
+                    id_sach: selectedIdsach,
+                    ngaymuon: $('#ngaymuon').val(),
+                    ngaytra: $('#ngaytra').val(),
                 };
-
                 $.ajax({
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -159,6 +227,35 @@
                         // Error occurred while creating book
                         console.log(xhr.response);
                         // Show error message or perform any other error handling
+                    }
+                });
+            });
+            $('#myTable').on('click', '.btnDelete', function() {
+                var id = $(this).data('id');
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'You are about to delete the record.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Delete',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            url: '/muonsach/xoa/' + id,
+                            type: 'DELETE',
+                            success: function() {
+                                Swal.fire({
+                                    title: 'Delete success!!',
+                                    text: 'You clicked the button!',
+                                    icon: 'success'
+                                });
+                                dataTable.ajax.reload();
+                            }
+                        });
                     }
                 });
             });

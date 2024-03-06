@@ -39,6 +39,7 @@ Route::get('/muonsach',[MuonTraController::class,'index']);
 Route::get('/muonsach/get',[MuonTraController::class,'getAll']);
 Route::get('/getIds',[MuonTraController::class,'dropdowlist']);
 Route::post('/muonsach/them',[MuonTraController::class,'insert']);
+Route::delete('/muonsach/xoa/{id}',[MuonTraController::class,'delete']);
 });
 
 
