@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('book_user', function (Blueprint $table) {
             $table->id();
-            $table->string('ngaymuon');
-            $table->string('ngaytra');
-            $table->string('tinhtrang');
+            $table->date('ngaymuon');
+            $table->date('ngaytra');
+            $table->integer('tinhtrang');
             $table->UNSIGNEDbigInteger('id_sach');
             $table->UNSIGNEDbigInteger('id_sinhvien');
             $table->timestamps();

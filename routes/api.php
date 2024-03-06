@@ -17,16 +17,7 @@ use App\Http\Controllers\KhachHangController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::middleware(['custom.api'])->group(function () {
+
 });
-
-Route::post('/books', [HomeController::class, 'store']);
-Route::put('/books/update/{id}',[HomeController::class,'update']);
-Route::delete('/books/delete/{id}',[HomeController::class,'delete']);
-
-
-Route::get('/users',[KhachHangController::class,'post']);
-Route::post('/users',[KhachHangController::class,'insert']);
-Route::put('/users/update/{id}',[KhachHangController::class,'update']);
-Route::delete('/users/delete/{id}',[KhachHangController::class,'delete']);
+   

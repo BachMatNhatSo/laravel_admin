@@ -10,6 +10,7 @@
                 </div>
                 <div class="modal-body">
                     <form id="createBookForm">
+                        @csrf
                         <input type="hidden" id="id">
                         <div class="form-group row">
                             <label for="inputEmail3" class="col-sm-3 col-form-label">Tên Sách: </label>
@@ -75,7 +76,10 @@
         $(document).ready(function() {
             var dataTable = $('#myTable').DataTable({
                 ajax: {
-                    url: '/api/getdbbook',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    url: '/getdbbook',
                     method: 'GET',
                     dataSrc: function(data) {
                         return data;
@@ -123,7 +127,7 @@
             $('#myTable').on('click', '.btnUpdate', function() {
                 $('#id').val($(this).data('id'));
             });
-            $('.btnThem').click(function() {
+            $('#btnThem').click(function() {
                 lamsach();
             });
             $('#createBookForm').on('submit', function(event) {
@@ -140,14 +144,17 @@
                 var method = "";
 
                 if (id) {
-                    url = 'api/books/update/' + id;
+                    url = '/books/update/' + id;
                     method = "PUT";
                 } else {
-                    url = '/api/books';
-                    method = 'POST';
+                    url = '/books';
+                    method = "POST";
                 }
                 // Send AJAX request to create book
                 $.ajax({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
                     url: url,
                     method: method,
                     data: formData,
@@ -179,7 +186,10 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         $.ajax({
-                            url: 'api/books/delete/' + id,
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            url: '/books/delete/' + id,
                             type: 'DELETE',
                             success: function() {
                                 Swal.fire({

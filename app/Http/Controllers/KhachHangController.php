@@ -11,7 +11,7 @@ class KhachHangController extends Controller
     public function get(){
         return view('khachhang');
     }
-    public function post(){
+    public function getAllUser(){
        $user=UserModel::all();
        return response()->json($user,200);
   }

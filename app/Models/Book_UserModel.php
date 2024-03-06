@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Book_UserModel extends Model
 {
@@ -13,4 +14,5 @@ class Book_UserModel extends Model
     protected $fillable=["id_sach","id_sinhvien","ngaymuon","ngaytra","tinhtrang"];
     public $timestamps = false;
     
+   
 }

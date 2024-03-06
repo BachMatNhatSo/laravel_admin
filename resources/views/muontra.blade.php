@@ -10,22 +10,23 @@
                 </div>
                 <div class="modal-body">
                     <form id="createBookForm">
+                        @csrf
                         <input type="hidden" id="id">
                         <div class="form-group row">
-                            <label for="inputEmail3" class="col-sm-3 col-form-label">Tên Sinh Viên: </label>
+                            <label for="inputSinhVien" class="col-sm-3 col-form-label">Tên Sinh Viên: </label>
                             <div class="col-sm-9">
-                                <input type="text" class="form-control" id="tensinhvien" name="tensinhvien" required
-                                    placeholder="Duy Nhân">
+                                <select class="form-control" id="sinhvien" name="sinhvien">
+                                </select>
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label for="inputPassword3" class="col-sm-3 col-form-label">Mã SV: </label>
+                            <label for="inputSinhVien" class="col-sm-3 col-form-label">Tên Sách: </label>
                             <div class="col-sm-9">
-                                <input type="text" class="form-control" id="mssv" name="mssv" required
-                                    placeholder="11911123">
+                                <select class="form-control" id="sach" name="sach">
+                                </select>
                             </div>
                         </div>
-                        <div class="form-group row">
+                        {{-- <div class="form-group row">
                             <label for="inputPassword3" class="col-sm-3 col-form-label">Điện Thoại: </label>
                             <div class="col-sm-9">
                                 <input type="text" class="form-control" id="dienthoai" name="dienthoai" required
@@ -38,7 +39,7 @@
                                 <input type="text" class="form-control" id="diachi" name="diachi" required
                                     placeholder="vd: Bạch Ngọc Sách">
                             </div>
-                        </div>
+                        </div> --}}
                         <input id="btnsubmit" type="submit" value="Submit">
                     </form>
                 </div>
@@ -57,10 +58,10 @@
                             <tr>
                                 <td>ID</td>
                                 <td>Tên Sinh Viên</td>
-                                <td>Mã Sinh Viên</td>
-                                <td>SĐT</td>
-                                <td>Địa chỉ</td>
-                                <td>Action</td>
+                                <td>Tên Sách</td>
+                                <td>Ngày Mượn</td>
+                                <td>Ngày Trả</td>
+                                <td>Tình Trạng</td>
                             </tr>
                         </thead>
                     </table>
@@ -74,13 +75,12 @@
 @section('js')
     <script>
         $(document).ready(function() {
-            //get all data
             var dataTable = $('#myTable').DataTable({
                 ajax: {
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
-                    url: '/users/get',
+                    url: '/muonsach/get',
                     type: 'GET',
                     dataSrc: function(data) {
                         return data;
@@ -88,70 +88,65 @@
                 },
                 columns: [{
                         data: 'id'
-                    }, {
+                    },
+                    {
                         data: 'tensinhvien'
-                    },
-                    {
-                        data: 'mssv'
-                    },
-                    {
-                        data: 'dienthoai'
-                    },
-                    {
-                        data: 'diachi'
                     }, {
-                        data: null,
+                        data: 'tensach'
+                    }, {
+                        data: 'ngaymuon'
+                    }, {
+                        data: 'ngaytra'
+                    }, {
+                        data: 'tinhtrang',
                         render: function(data, type, row, meta) {
-                            return `<button class="btnUpdate" data-id="${row.id}" data-toggle="modal" data-target="#myModal">Update</button> 
-                            <button class="btnDelete" data-id="${row.id}">Delete</button>`;
+                            if (data == 0) {
+                                return 'Chưa Trả';
+                            } else {
+                                return 'Đã Trả';
+                            }
                         }
                     }
+
                 ]
             });
-            //clear text
-            function clearText() {
-                $('#id').val('');
-                $('#tensinhvien').val('');
-                $('#msssv').val('');
-                $('#dienthoai').val('');
-                $('#diachi').val('');
-            }
-            //get id of btnupdate
-            $('#myTable').on('click', '.btnUpdate', function() {
-                $('#id').val($(this).data('id'));
-            });
-            $('#btnThem').click(function() {
-                clearText();
-            });
-            //insert and update
-            $('#createBookForm').on('submit', function(event) {
-                event.preventDefault();
-                //get from data
-                var formdata = {
-                    tensinhvien: $('#tensinhvien').val(),
-                    mssv: $('#mssv').val(),
-                    dienthoai: $('#dienthoai').val(),
-                    diachi: $('#diachi').val(),
-                };
-                var id = $('#id').val();
-                var url = "";
-                var type = "";
 
-                if (id) {
-                    url = '/users/update/' + id;
-                    type = "PUT";
-                } else {
-                    url = '/users';
-                    type = 'POST';
+            $.ajax({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                url: '/getIds',
+                type: 'GET',
+                success: function(data) {
+                    // Populate dropdown for Sinh Viên
+                    $('#sinhvien').append($('<option>').val('').text('Choose Sinh Viên'));
+                    // Populate dropdown for Sách
+                    $('#sach').append($('<option>').val('').text('Choose Sách'));
+
+                    data.jointable.forEach(function(item) {
+                        $('#sinhvien').append($('<option>').val(item.id).text(item
+                            .tensinhvien));
+                        $('#sach').append($('<option>').val(item.id).text(item.tensach));
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error(error);
                 }
+            });
+            $('#createBookForm').on('submit', function() {
+                var formdata = {
+                    sinhvien: $('#sinhvien').val(),
+                    sach: $('#sach').val()
+                };
+
                 $.ajax({
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
-                    url: url,
-                    type: type,
+                    url: '/muonsach/them',
+                    type: "POST",
                     data: formdata,
-                    success: function(response) {
+                    success: function() {
                         Swal.fire({
                             title: "Add success!!",
                             text: "You clicked the button!",
@@ -166,44 +161,8 @@
                         // Show error message or perform any other error handling
                     }
                 });
-
-            });
-            //delete
-            $('#myTable').on('click', '.btnDelete', function() {
-                var id = $(this).data('id');
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: 'You are about to delete the record.',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Delete',
-                    cancelButtonText: 'Cancel'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            headers: {
-                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                            },
-                            url: '/users/delete/' + id,
-                            type: 'DELETE',
-                            success: function() {
-                                Swal.fire({
-                                    title: 'Delete success!!',
-                                    text: 'You clicked the button!',
-                                    icon: 'success'
-                                });
-                                dataTable.ajax.reload();
-                            }
-                        });
-                    }
-                });
             });
 
-
-
-
-
-            //////////end/////////////
         });
     </script>
 @endsection

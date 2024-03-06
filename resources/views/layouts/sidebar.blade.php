@@ -58,11 +58,12 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="./index3.html" class="nav-link active">
+                            <a href="/muonsach" class="nav-link">
                                 <i class="far fa-circle nav-icon"></i>
-                                <p>Mượn-Trả</p>
+                                <p>Danh Sách Mượn Trả</p>
                             </a>
                         </li>
+
                     </ul>
                 </li>
 

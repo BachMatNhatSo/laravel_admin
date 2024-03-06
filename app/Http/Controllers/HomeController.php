@@ -27,7 +27,7 @@ public function store(Request $request){
       'nhaxuatban'=>'required'
    ]);
    
-   BookModel::created($validationData);
+   BookModel::create($validationData);
    // dd($item);
  
 }
