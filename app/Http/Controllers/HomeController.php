@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Imports\BookImport;
 use App\Models\BookModel;
 use App\Models\UserModel;
+use App\Imports\BookImport;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class HomeController extends Controller
 {
@@ -37,14 +40,21 @@ public function insert(Request $request){
    // dd($item);
 }
 public function insert_api(Request $request){
-   $validationData= $request ->validate([
-      'tensach'=>'required',
-      'tacgia'=>'required',
-      'giatien'=>'required| integer',
-      'nhaxuatban'=>'required'
-   ]);
-   $item=BookModel::create($validationData);
-   return response()->json(['success'=>true,'data'=>$item,'message'=>'thành công']);
+   
+   try{
+      $validationData= $request ->validate([
+         'tensach'=>'required',
+         'tacgia'=>'required',
+         'giatien'=>'required| integer',
+         'nhaxuatban'=>'required'
+      ]);
+      $item=BookModel::create($validationData);
+      return response()->json(['success'=>true,'data'=>$item,'message'=>'thành công']);
+   }catch (ValidationException $e) {
+       
+        $errors = $e->validator->errors()->all();
+        return response()->json(['success' => false, 'errors' => $errors], Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
 }
 public function update(Request $request,$id){
    $item =$request ->only(['tensach','tacgia','giatien','nhaxuatban']);
@@ -53,11 +63,28 @@ public function update(Request $request,$id){
    // BookModel::where('id',$id)->update($item);
 }
 //api cập nhật sách
-public function update_api(Request $request,$id){
-   $item =$request ->only(['tensach','tacgia','giatien','nhaxuatban']);
-   $book=BookModel::find($id);
-   $book->update($item);
-   return response()->json(['success'=>true,'data'=>$book,'message'=>'thành công']);
+public function update_api(Request $request, $id) {
+   try {
+       $request->validate([
+           'tensach' => 'required',
+           'tacgia' => 'required',
+           'giatien' => 'required|numeric|min:0', 
+           'nhaxuatban' => 'required'
+       ]);
+       
+       $item = $request->only(['tensach', 'tacgia', 'giatien', 'nhaxuatban']);
+       
+       $book = BookModel::findOrFail($id);
+       $book->update($item);
+       
+       return response()->json(['success' => true, 'data' => $book, 'message' => 'Thành công']);
+   } catch (ValidationException $e) {
+       $errors = $e->validator->errors()->all();
+       return response()->json(['success' => false, 'errors' => $errors], Response::HTTP_UNPROCESSABLE_ENTITY);
+   } catch (\Exception $e) {
+     
+       return response()->json(['success' => false, 'error' => 'Đã xảy ra lỗi không mong muốn'], Response::HTTP_INTERNAL_SERVER_ERROR);
+   }
 }
 public function delete($id){
    $book=BookModel::find($id);
@@ -65,11 +92,16 @@ public function delete($id){
    
 }
 //api xóa 1 quyền sách
-public function delete_api($id){
-   $book=BookModel::find($id);
-   $book->delete();
-   return response()->json(['success'=>true,'data'=>$book,'message'=>'thành công']);
-   
+public function delete_api($id) {
+   try {
+       $book = BookModel::findOrFail($id); 
+       $book->delete();
+       return response()->json(['success' => true, 'data' => $book, 'message' => 'Thành công']);
+   } catch (ModelNotFoundException $e) {
+       return response()->json(['success' => false, 'error' => 'Sách không tồn tại'], Response::HTTP_NOT_FOUND);
+   } catch (\Exception $e) {
+       return response()->json(['success' => false, 'error' => 'Đã xảy ra lỗi không mong muốn'], Response::HTTP_INTERNAL_SERVER_ERROR);
+   }
 }
 public function import(Request $request){
    $request->validate(['file'=>'required|mimes:xlsx,xls']);

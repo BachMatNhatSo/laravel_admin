@@ -26,7 +26,7 @@
                             <input type="file" class="form-control-file" id="file" name="file">
                         </div>
                         <div class="col">
-                            <button type="submit" class="btn btn-primary">Upload</button>
+                            <button type="submit" id="uploadButton" class="btn btn-primary">Upload</button>
                         </div>
                     </div>
                 </div>
@@ -50,28 +50,28 @@
                         <div class="form-group row">
                             <label for="inputEmail3" class="col-sm-3 col-form-label">Tên Sinh Viên: </label>
                             <div class="col-sm-9">
-                                <input type="text" class="form-control" id="tensinhvien" name="tensinhvien" required
-                                    placeholder="Duy Nhân">
+                                <input type="text" required class="form-control" id="tensinhvien" name="tensinhvien"
+                                    required placeholder="Duy Nhân">
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="inputPassword3" class="col-sm-3 col-form-label">Mã SV: </label>
                             <div class="col-sm-9">
-                                <input type="text" class="form-control" id="mssv" name="mssv" required
+                                <input type="text" required class="form-control" id="mssv" name="mssv" required
                                     placeholder="11911123">
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="inputPassword3" class="col-sm-3 col-form-label">Điện Thoại: </label>
                             <div class="col-sm-9">
-                                <input type="text" class="form-control" id="dienthoai" name="dienthoai" required
-                                    placeholder="0123456">
+                                <input type="number" required min="1" class="form-control" id="dienthoai"
+                                    name="dienthoai" required placeholder="0123456">
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="inputPassword3" class="col-sm-3 col-form-label">Địa Chỉ</label>
                             <div class="col-sm-9">
-                                <input type="text" class="form-control" id="diachi" name="diachi" required
+                                <input type="text" required class="form-control" id="diachi" name="diachi" required
                                     placeholder="vd: Bạch Ngọc Sách">
                             </div>
                         </div>
@@ -240,6 +240,14 @@
 
 
             //////////end/////////////
+        });
+        document.getElementById('uploadButton').addEventListener('click', function() {
+            // Show SweetAlert notification
+            Swal.fire({
+                title: "Success!!",
+                text: "You clicked the upload button!",
+                icon: "success"
+            });
         });
     </script>
 @endsection

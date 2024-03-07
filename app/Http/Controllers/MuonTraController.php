@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Book_UserModel;
 use App\Models\BookModel;
 use App\Models\UserModel;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use App\Models\Book_UserModel;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class MuonTraController extends Controller
 {
@@ -47,9 +50,33 @@ class MuonTraController extends Controller
         }
             return response()->json(['dropDownDataSach'=>$dropDownDataSach,'dropDownDataSV'=>$dropDownDataSV]);
     }
-    public function insert(Request $request){
-        $item = $request->only(['id_sinhvien','id_sach','ngaymuon','ngaytra','tinhtrang']);
+    public function insert(Request $request) {
+        try {
+            // Validate the incoming request data
+            $request->validate([
+                'id_sinhvien' => 'required',
+                'id_sach' => 'required',
+                'ngaymuon' => 'required|date',
+                'ngaytra' => 'required|date|after:ngaymuon', // ngaytra must be after ngaymuon
+                'tinhtrang' => 'required'
+            ]);
+    
+            // Extract the validated data from the request
+            $item = $request->only(['id_sinhvien', 'id_sach', 'ngaymuon', 'ngaytra', 'tinhtrang']);
+    
+            // Create a new Book_UserModel instance with validated data
             Book_UserModel::create($item);
+    
+            // Return a success response
+            return response()->json(['success' => true, 'data' => $item, 'message' => 'Thành công']);
+        } catch (ValidationException $e) {
+            // If validation fails, return error response with validation errors
+            $errors = $e->validator->errors()->all();
+            return response()->json(['success' => false, 'errors' => $errors], Response::HTTP_UNPROCESSABLE_ENTITY);
+        } catch (\Exception $e) {
+            // If any other unexpected exception occurs, return a generic error response
+            return response()->json(['success' => false, 'error' => 'Đã xảy ra lỗi không mong muốn'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
     public function insert_api(Request $request){
         $item = $request->only(['id_sinhvien','id_sach','ngaymuon','ngaytra','tinhtrang']);
@@ -73,13 +100,23 @@ class MuonTraController extends Controller
         $muontra=Book_UserModel::find($id);
         $muontra->update($item);
         return response()->json(['success'=>true,'data'=>$muontra,'message'=>'thành công']);
-      }public function delete_api($id){
-        $book=Book_UserModel::find($id);
-        $book->delete();
-        if(!$book){
-            response()->json(['errror'=>'loi',404]);
-        }return response()->json(['success'=>true,'data'=>$book,'message'=>'thành công']);
-
-      }
+      }public function delete_api($id) {
+        try {
+            // Find the book by ID
+            $book = Book_UserModel::findOrFail($id);
+    
+            // Attempt to delete the book
+            $book->delete();
+    
+            // If deletion is successful, return success response
+            return response()->json(['success' => true, 'data' => $book, 'message' => 'Thành công']);
+        } catch (ModelNotFoundException $e) {
+            // If the book is not found, return error response
+            return response()->json(['success' => false, 'error' => 'Không tìm thấy dữ liệu'], Response::HTTP_NOT_FOUND);
+        } catch (\Exception $e) {
+            // If any other unexpected exception occurs, return generic error response
+            return response()->json(['success' => false, 'error' => 'Đã xảy ra lỗi không mong muốn'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 
 }

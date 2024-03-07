@@ -24,7 +24,7 @@
                                 <input type="file" class="form-control-file" id="file" name="file">
                             </div>
                             <div class="col">
-                                <button type="submit" class="btn btn-primary">Upload</button>
+                                <button type="submit" id="uploadButton" class="btn btn-primary">Upload</button>
                             </div>
                         </div>
                     </div>
@@ -236,6 +236,14 @@
                         });
                     }
                 });
+            });
+        });
+        document.getElementById('uploadButton').addEventListener('click', function() {
+            // Show SweetAlert notification
+            Swal.fire({
+                title: "Success!!",
+                text: "You clicked the upload button!",
+                icon: "success"
             });
         });
     </script>

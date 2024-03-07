@@ -40,13 +40,13 @@
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label for="inputSinhVien" class="col-sm-3 col-form-label">Ngày Mượn: </label>
+                            <label for="inputSinhVien" required class="col-sm-3 col-form-label">Ngày Mượn: </label>
                             <div class="col-sm-9">
                                 <input type="date" id="ngaymuon" name="ngaymuon">
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label for="inputSinhVien" class="col-sm-3 col-form-label">Ngày Trả: </label>
+                            <label for="inputSinhVien" required class="col-sm-3 col-form-label">Ngày Trả: </label>
                             <div class="col-sm-9">
                                 <input type="date" id="ngaytra" name="ngaytra">
                             </div>
