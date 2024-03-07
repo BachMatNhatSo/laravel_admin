@@ -1,12 +1,46 @@
 @extends('layouts.master')
 @section('content')
-    <button type="button" id="btnThem" class ="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Thêm</button>
+    <button type="button"style="margin-left: 13px;" id="btnThem" class="btn btn-warning btn-lg" data-toggle="modal"
+        data-target="#myModal">Thêm
+        Sách</button>
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+    <div class="">
+        <div class="row">
+            <div class="col-sm-4">
+                <form action="{{ route('import.process') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="file" style="margin-left:15px;" class="col-form-label">Thêm bằng file Excel</label>
+                        <div class="row " style="margin-left:12px;">
+                            <div class="col">
+                                <input type="file" class="form-control-file" id="file" name="file">
+                            </div>
+                            <div class="col">
+                                <button type="submit" class="btn btn-primary">Upload</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+
     <div id="myModal" class="modal fade" role="dialog">
         <div class="modal-dialog">
             <!-- Modal content-->
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Modal Header</h4>
+                    <h4 class="modal-title">Điền Thông Tin</h4>
                 </div>
                 <div class="modal-body">
                     <form id="createBookForm">

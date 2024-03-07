@@ -17,22 +17,24 @@ class MuonTraController extends Controller
         $jointable = DB::table('book_user')->select('book_user.id','user.tensinhvien','book.tensach','book_user.tinhtrang','book_user.ngaymuon','book_user.ngaytra')->join('book','book_user.id_sach','=',"book.id")->join('user','user.id','=','book_user.id_sinhvien')->get();
         return response()->json($jointable);
     }
+    // api lấy tất cả phiếu mượn : tinh
+    public function getAll_api(){
+        $jointable = DB::table('book_user')->select('book_user.id','user.tensinhvien','book.tensach','book_user.tinhtrang','book_user.ngaymuon','book_user.ngaytra')->join('book','book_user.id_sach','=',"book.id")->join('user','user.id','=','book_user.id_sinhvien')->get();
+        return response()->json(['success'=>true,'data'=>$jointable,'message'=>'thành công']);
+    }
+    public function searchTDFT(Request $request){
+        $to_date=$request->only('todate');
+        $from_date=$request->only('from_date');
+        $jointable = DB::table('book_user')->select('book_user.id','user.tensinhvien','book.tensach','book_user.tinhtrang','book_user.ngaymuon','book_user.ngaytra')->join('book','book_user.id_sach','=',"book.id")->join('user','user.id','=','book_user.id_sinhvien');
+        if($to_date && $from_date){
+            $jointable->WhereBetween('book_user.ngaymuon',[$to_date,$from_date]);
+        }
+        $jointableData=$jointable->get();
+        return response()->json($jointableData);
+    }
     //dùng để hiển thị db của 2 ddl
     public function dropdowlist(Request $request){
-    //     $jointable = DB::table('book_user')
-    //     ->select('book_user.id', 'user.tensinhvien', 'book.tensach')
-    //     ->join('book', 'book_user.id_sach', '=', 'book.id')
-    //     ->join('user', 'user.id', '=', 'book_user.id_sinhvien')
-    //     ->get();
-    //     $dropDownDataSV = [];
-    //     $dropDownDataSach = [];
-
-    // foreach($jointable as $item){
-    //     $dropDownDataSV[$item->id] = $item->tensinhvien;
-    //     $dropDownDataSach[$item->id] = $item->tensach;
-    // }
-
-    //     return response()->json(['dropDownDataSV'=>$dropDownDataSV,'dropDownDataSach'=>$dropDownDataSach]);
+    
         $tblBook =BookModel::all();
         $tblSV =UserModel::all();
         $dropDownDataSach = [];
@@ -46,8 +48,13 @@ class MuonTraController extends Controller
             return response()->json(['dropDownDataSach'=>$dropDownDataSach,'dropDownDataSV'=>$dropDownDataSV]);
     }
     public function insert(Request $request){
-        $item = $request->only(['id_sinhvien','id_sach','ngaymuon','ngaytra']);
+        $item = $request->only(['id_sinhvien','id_sach','ngaymuon','ngaytra','tinhtrang']);
             Book_UserModel::create($item);
+    }
+    public function insert_api(Request $request){
+        $item = $request->only(['id_sinhvien','id_sach','ngaymuon','ngaytra','tinhtrang']);
+            $book=Book_UserModel::create($item);
+            return response()->json(['success'=>true,'data'=>$book,'message'=>'thành công']);
     }
     public function delete($id){
         $book=Book_UserModel::find($id);
@@ -55,7 +62,24 @@ class MuonTraController extends Controller
         if(!$book){
             response()->json(['errror'=>'loi',404]);
         }
-        
+      }
+      public function update(Request $request,$id){
+        $item= $request->only('id_sinhvien','id_sach','ngaymuon','ngaytra','tinhtrang');
+        $muontra=Book_UserModel::find($id);
+        $muontra->update($item);
+      }
+      public function update_api(Request $request,$id){
+        $item= $request->only('id_sinhvien','id_sach','ngaymuon','ngaytra','tinhtrang');
+        $muontra=Book_UserModel::find($id);
+        $muontra->update($item);
+        return response()->json(['success'=>true,'data'=>$muontra,'message'=>'thành công']);
+      }public function delete_api($id){
+        $book=Book_UserModel::find($id);
+        $book->delete();
+        if(!$book){
+            response()->json(['errror'=>'loi',404]);
+        }return response()->json(['success'=>true,'data'=>$book,'message'=>'thành công']);
+
       }
 
 }

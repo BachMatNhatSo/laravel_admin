@@ -24,7 +24,7 @@ Route::get('/',[HomeController::class,'index']);
 
 Route::get('books',[HomeController::class,'getAllBooks']);
 Route::get('getdbbook',[HomeController::class,'getAllBooksjson']);
-Route::post('/books', [HomeController::class, 'store']);
+Route::post('/books', [HomeController::class, 'insert']);
 Route::put('/books/update/{id}',[HomeController::class,'update']);
 Route::delete('/books/delete/{id}',[HomeController::class,'delete']);
 
@@ -35,11 +35,18 @@ Route::post('/users',[KhachHangController::class,'insert']);
 Route::put('/users/update/{id}',[KhachHangController::class,'update']);
 Route::delete('/users/delete/{id}',[KhachHangController::class,'delete']);
 
+
+Route::get('/muonsach/toDateFromDate',[MuonTraController::class,'searchTDFT']);
 Route::get('/muonsach',[MuonTraController::class,'index']);
 Route::get('/muonsach/get',[MuonTraController::class,'getAll']);
 Route::get('/getIds',[MuonTraController::class,'dropdowlist']);
 Route::post('/muonsach/them',[MuonTraController::class,'insert']);
+Route::put('/muonsach/capnhat/{id}',[MuonTraController::class,'update']);
 Route::delete('/muonsach/xoa/{id}',[MuonTraController::class,'delete']);
+
+
+Route::post('/import', [HomeController::class, 'import'])->name('import.process');
+Route::post('/importsv', [KhachHangController::class, 'importsv'])->name('importsv.processsv');
 });
 
 

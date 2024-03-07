@@ -1,12 +1,25 @@
 @extends('layouts.master')
 @section('content')
-    <button type="button" id="btnThem" class ="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Thêm</button>
+    <button type="button" style="margin-left: 13px;" id="btnThem" class="btn btn-warning btn-lg" data-toggle="modal"
+        data-target="#myModal">Thêm</button>
+    <div class="form-group row" style="margin-left:15px;">
+        <label for="fromDate" class="col-sm-0 col-form-label">FromDate: </label>
+        <div class="col-sm-2">
+            <input type="date" id="fromDate" name="fromDate" class="form-control">
+        </div>
+        <label for="toDate" class="col-sm-0 col-form-label">ToDate: </label>
+        <div class="col-sm-2">
+            <input type="date" id="toDate" name="toDate" class="form-control">
+        </div>
+    </div>
+
+
     <div id="myModal" class="modal fade" role="dialog">
         <div class="modal-dialog">
             <!-- Modal content-->
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Modal Header</h4>
+                    <h4 class="modal-title">Điền Thông Tin</h4>
                 </div>
                 <div class="modal-body">
                     <form id="createBookForm">
@@ -38,6 +51,15 @@
                                 <input type="date" id="ngaytra" name="ngaytra">
                             </div>
                         </div>
+                        <div class="form-group row">
+                            <label for="inputSinhVien" class="col-sm-3 col-form-label">Tình Trạng: </label>
+                            <div class="col-sm-9">
+                                <select class="form-control" id="tinhtrang" name="tinhtrang">
+                                    <option value="0">Đang Mượn</option>
+                                    <option value="1">Đã Trả</option>
+                                </select>
+                            </div>
+                        </div>
                         {{-- <div class="form-group row">
                             <label for="inputPassword3" class="col-sm-3 col-form-label">Điện Thoại: </label>
                             <div class="col-sm-9">
@@ -60,6 +82,8 @@
             </div>
         </div>
     </div>
+
+
     <div class="card-body">
         <div id="example1_wrapper" class="dataTables_wrapper dt-bootstrap4">
             <div class="row">
@@ -88,6 +112,7 @@
 @section('js')
     <script>
         $(document).ready(function() {
+
             var dataTable = $('#myTable').DataTable({
                 ajax: {
                     headers: {
@@ -123,7 +148,7 @@
                             var year = date.getFullYear();
 
                             // Format the date in "dd/mm/yyyy" format
-                            var formattedDate = day + '/' + month + '/' + year;
+                            var formattedDate = day + '-' + month + '-' + year;
 
                             return formattedDate;
                         }
@@ -144,7 +169,7 @@
                             var year = date.getFullYear();
 
                             // Format the date in "dd/mm/yyyy" format
-                            var formattedDate = day + '/' + month + '/' + year;
+                            var formattedDate = day + '-' + month + '-' + year;
 
                             return formattedDate;
                         }
@@ -152,9 +177,9 @@
                         data: 'tinhtrang',
                         render: function(data, type, row, meta) {
                             if (data == 0) {
-                                return 'Đã Trả';
+                                return 'Đang Mượn';
                             } else {
-                                return 'Chưa Trả';
+                                return 'Đã Trả';
                             }
                         }
                     }, {
@@ -167,11 +192,33 @@
 
                 ]
             });
+            $('#fromDate, #toDate').on('change', function() {
+                var fromDate = $('#fromDate').val();
+                var toDate = $('#toDate').val();;
+                $.fn.dataTable.ext.search.push(
+                    function(settings, data, dataIndex) {
+                        var minDate = fromDate ? new Date(fromDate) : null;
+                        var maxDate = toDate ? new Date(toDate) : null;
 
-            //
+                        var ngayMuon = new Date(moment(data[3], "DD-MM-YYYY").format(
+                            "YYYY-MM-DD")); // Index 3 corresponds to "NgayMuon" column
+                        ;
+                        var ngayTra = new Date(moment(data[4], "DD-MM-YYYY").format(
+                            "YYYY-MM-DD")); // Index 4 corresponds to "NgayTra" column
+                        if ((minDate != null && maxDate != null) && (ngayMuon >= minDate && ngayMuon <=
+                                maxDate)) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                );
 
-
-
+                dataTable.draw();
+                // Remove the custom search function after filtering
+                $.fn.dataTable.ext.search.pop();
+            });
+            //fill data in 2 <select> sv and sach
             $.get('/getIds', function(response) {
                 var dropDownDataSV = response.dropDownDataSV;
                 var dropdownsv = $('#sinhvien');
@@ -184,35 +231,44 @@
                 $.each(dropDownDataSach, function(id, name) {
                     dropdownSach.append($('<option></option>').val(id).text(name));
                 });
-
-                dropdownsv.on('change', function() {
-                    selectedIdsv = $(this).val(); // Assign value to the variable
-                    var selectedName = dropDownDataSV[selectedIdsv];
-                    console.log('selected sinh vien id:' + selectedIdsv);
-                    console.log('selected sinh vien name:' + selectedName);
-                });
-
-                dropdownSach.on('change', function() {
-                    selectedIdsach = $(this).val(); // Assign value to the variable
-                    var selectedName = dropDownDataSach[selectedIdsach];
-                    console.log('selected sach id:' + selectedIdsach);
-                    console.log('selected sach name:' + selectedName);
-                });
             });
+            //
+            function clearText() {
+                $('#id').val('');
+
+            }
+            $('#myTable').on('click', '.btnUpdate', function() {
+                $('#id').val($(this).data('id'));
+            });
+            $('#btnThem').click(function() {
+                clearText();
+            });
+            //insert and update mượn trả
             $('#createBookForm').on('submit', function(event) {
                 event.preventDefault();
                 var formdata = {
-                    id_sinhvien: selectedIdsv,
-                    id_sach: selectedIdsach,
+                    id_sinhvien: $('#sinhvien').val(),
+                    id_sach: $('#sach').val(),
                     ngaymuon: $('#ngaymuon').val(),
                     ngaytra: $('#ngaytra').val(),
+                    tinhtrang: $('#tinhtrang').val()
                 };
+                var id = $('#id').val();
+                var url = '';
+                var type = '';
+                if (id) {
+                    url = '/muonsach/capnhat/' + id;
+                    type = 'PUT';
+                } else {
+                    url = '/muonsach/them';
+                    type = "POST";
+                }
                 $.ajax({
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
-                    url: '/muonsach/them',
-                    type: "POST",
+                    url: url,
+                    type: type,
                     data: formdata,
                     success: function() {
                         Swal.fire({
@@ -230,6 +286,9 @@
                     }
                 });
             });
+
+
+            //deltele
             $('#myTable').on('click', '.btnDelete', function() {
                 var id = $(this).data('id');
                 Swal.fire({
