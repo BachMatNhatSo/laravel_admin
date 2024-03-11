@@ -13,9 +13,9 @@ class CheckSecrectKey
      */
     public function handle(Request $request ,Closure $next)
     {
-        $secrectKey= $request->input('secrectKey');
-        if($secrectKey!=config('cumstom.secrectKey')){
-            return response()->json('loi secrectkey');
+        $secrectKey= $request->input('secretKey');
+        if($secrectKey!=config('cumstom.secretKey')){
+            return response()->json(['error'=>true,'message'=>'SecretKey not found!']);
         }
         return $next($request);
     }

@@ -43,7 +43,7 @@ Route::get('/getIds',[MuonTraController::class,'dropdowlist']);
 Route::post('/muonsach/them',[MuonTraController::class,'insert_api']);
 Route::put('/muonsach/capnhat/{id}',[MuonTraController::class,'update_api']);
 Route::delete('/muonsach/xoa/{id}',[MuonTraController::class,'delete_api']);
-
+Route::get('/muonsach/getDataToDate',[MuonTraController::class,'searchTDFT']);
 
 
 

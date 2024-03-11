@@ -20,7 +20,7 @@ use App\Models\User;
 
 Route::middleware('auth')->group(function () {
     
-Route::get('/',[HomeController::class,'index']);
+Route::get('/',[HomeController::class,'getAllBooks']);
 
 Route::get('books',[HomeController::class,'getAllBooks']);
 Route::get('getdbbook',[HomeController::class,'getAllBooksjson']);
@@ -53,4 +53,6 @@ Route::post('/importsv', [KhachHangController::class, 'importsv'])->name('import
 Route::prefix('login')->group(function(){
     Route::get('/',[UserController::class,'index'])->name('login');
     Route::post('/',[UserController::class,'login']);
+    Route::get('/reloadCaptcha',[UserController::class,'reloadCaptcha']);
 });
+Route::get('/reloadCaptcha',[UserController::class,'reloadCaptcha']);

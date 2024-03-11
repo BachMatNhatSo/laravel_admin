@@ -1,2 +1,2 @@
 <?php
-return ['secrectKey'=>env('SECRECT_KEY')]; 
+return ['secretKey'=>env('SECRECT_KEY')]; 

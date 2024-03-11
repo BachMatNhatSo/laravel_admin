@@ -40,7 +40,7 @@
             <!-- Modal content-->
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Điền Thông Tin</h4>
+                    <h4 id="modal-title" class="modal-title">Điền Thông Tin</h4>
                 </div>
                 <div class="modal-body">
                     <form id="createBookForm">
@@ -74,7 +74,7 @@
                                     placeholder="vd: Bạch Ngọc Sách">
                             </div>
                         </div>
-                        <input id="btnsubmit" type="submit" value="Submit">
+                        <input id="btnsubmit" type="submit" value="Xác Nhận">
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -145,8 +145,8 @@
                     {
                         data: null,
                         render: function(data, type, row, meta) {
-                            return `<button class="btnUpdate" data-id="${row.id}" data-toggle="modal" data-target="#myModal" >Update</button> 
-                            <button class="btnDelete" data-id="${row.id}">Delete</button>`;
+                            return `<button class="btnUpdate" data-id="${row.id}" data-toggle="modal" data-target="#myModal" ><i class="fas fa-edit"></i></button> 
+                            <button class="btnDelete" data-id="${row.id}"> <i class="fa fa-trash"></i></button>`;
                         }
                     }
                 ]
@@ -156,12 +156,21 @@
                 $('#id').val('');
                 $('#tensach').val('');
                 $('#tacgia').val('');
+                $('#giatien').val('');
+                $('#nhaxuatban').val('');
             }
 
             $('#myTable').on('click', '.btnUpdate', function() {
                 $('#id').val($(this).data('id'));
+                var rowdata = dataTable.row($(this).parents('tr')).data();
+                $('#tensach').val(rowdata.tensach);
+                $('#tacgia').val(rowdata.tacgia);
+                $('#giatien').val(rowdata.giatien);
+                $('#nhaxuatban').val(rowdata.nhaxuatban);
+                $('#modal-title').text('Cập Nhật');
             });
             $('#btnThem').click(function() {
+                $('#modal-title').text('Thêm Mới');
                 lamsach();
             });
             $('#createBookForm').on('submit', function(event) {
@@ -194,7 +203,7 @@
                     data: formData,
                     success: function(response) {
                         Swal.fire({
-                            title: "Add success!!",
+                            title: "Success!!",
                             text: "You clicked the button!",
                             icon: "success"
                         });

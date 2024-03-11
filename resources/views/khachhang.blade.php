@@ -1,7 +1,7 @@
 @extends('layouts.master')
 @section('content')
     <button type="button" style="margin-left: 13px;" id="btnThem" class="btn btn-warning btn-lg" data-toggle="modal"
-        data-target="#myModal">Thêm Sách</button>
+        data-target="#myModal">Thêm Sinh Viên</button>
 
 
 
@@ -42,7 +42,7 @@
             <!-- Modal content-->
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Điền Thông Tin</h4>
+                    <h4 id="modal-title" class="modal-title">Điền Thông Tin</h4>
                 </div>
                 <div class="modal-body">
                     <form id="createBookForm">
@@ -75,7 +75,7 @@
                                     placeholder="vd: Bạch Ngọc Sách">
                             </div>
                         </div>
-                        <input id="btnsubmit" type="submit" value="Submit">
+                        <input id="btnsubmit" type="submit" value="Xác Nhận">
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -138,8 +138,8 @@
                     }, {
                         data: null,
                         render: function(data, type, row, meta) {
-                            return `<button class="btnUpdate" data-id="${row.id}" data-toggle="modal" data-target="#myModal">Update</button> 
-                            <button class="btnDelete" data-id="${row.id}">Delete</button>`;
+                            return `<button class="btnUpdate" data-id="${row.id}" data-toggle="modal" data-target="#myModal"><i class="fas fa-edit"></i></button> 
+                            <button class="btnDelete" data-id="${row.id}"> <i class="fa fa-trash"></i></button>`;
                         }
                     }
                 ]
@@ -148,15 +148,22 @@
             function clearText() {
                 $('#id').val('');
                 $('#tensinhvien').val('');
-                $('#msssv').val('');
+                $('#mssv').val('');
                 $('#dienthoai').val('');
                 $('#diachi').val('');
             }
             //get id of btnupdate
             $('#myTable').on('click', '.btnUpdate', function() {
                 $('#id').val($(this).data('id'));
+                var rowdata = dataTable.row($(this).parents('tr')).data();
+                $('#tensinhvien').val(rowdata.tensinhvien);
+                $('#mssv').val(rowdata.mssv);
+                $('#dienthoai').val(rowdata.dienthoai);
+                $('#diachi').val(rowdata.diachi);
+                $('#modal-title').text('Cập Nhật');
             });
             $('#btnThem').click(function() {
+                $('#modal-title').text('Thêm Mới');
                 clearText();
             });
             //insert and update
@@ -189,7 +196,7 @@
                     data: formdata,
                     success: function(response) {
                         Swal.fire({
-                            title: "Add success!!",
+                            title: "Success!!",
                             text: "You clicked the button!",
                             icon: "success"
                         });

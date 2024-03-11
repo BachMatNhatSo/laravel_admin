@@ -25,9 +25,16 @@ class HomeController extends Controller
       return response()->json($book,200);
    }
    //api lấy tất cả danh sách sách hiện có 
-   public function getAllBooksjson_api(){
-      $book =BookModel::all();
-      return response()->json(['success'=>true,'data'=>$book,'message'=>'thành công']);
+   public function getAllBooksjson_api(Request $request){
+     $query = BookModel::query();
+     if($request ->filled('sortField')){
+      $query->orderBy($request->sortField,$request->input('sortOrder','asc'));
+     }
+     $pageSize = $request->input('pageSize', 10);
+     $books = $query->paginate($pageSize, ['*'], 'page', $request->input('page', 1));
+
+     return response()->json(['success' => true, 'data' => $books, 'message' => 'Thành công'], 200);
+
    }
 public function insert(Request $request){
    $validationData= $request ->validate([
@@ -45,7 +52,7 @@ public function insert_api(Request $request){
       $validationData= $request ->validate([
          'tensach'=>'required',
          'tacgia'=>'required',
-         'giatien'=>'required| integer',
+         'giatien'=>'required| integer|min:0',
          'nhaxuatban'=>'required'
       ]);
       $item=BookModel::create($validationData);

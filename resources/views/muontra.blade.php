@@ -1,13 +1,17 @@
 @extends('layouts.master')
 @section('content')
-    <button type="button" style="margin-left: 13px;" id="btnThem" class="btn btn-warning btn-lg" data-toggle="modal"
-        data-target="#myModal">Thêm</button>
-    <div class="form-group row" style="margin-left:15px;">
-        <label for="fromDate" class="col-sm-0 col-form-label">FromDate: </label>
+    <div class="btn-import-export-exc" style="padding-bottom: 5px">
+        <button type="button" style="margin-left: 13px;" id="btnThem" class="btn btn-warning btn-lg" data-toggle="modal"
+            data-target="#myModal">Thêm</button>
+        <button type="button" style="margin-left: 13px;" id="xuatExcel" class="btn btn-warning btn-lg">Xuất Excel</button>
+    </div>
+
+    <div class="" style="margin-left:15px; ">
+        <label for="fromDate" class="col-sm-0 col-form-label">Từ Ngày: </label>
         <div class="col-sm-2">
             <input type="date" id="fromDate" name="fromDate" class="form-control">
         </div>
-        <label for="toDate" class="col-sm-0 col-form-label">ToDate: </label>
+        <label for="toDate" class="col-sm-0 col-form-label">Đến Ngày: </label>
         <div class="col-sm-2">
             <input type="date" id="toDate" name="toDate" class="form-control">
         </div>
@@ -19,7 +23,7 @@
             <!-- Modal content-->
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Điền Thông Tin</h4>
+                    <h4 id="modal-title" class="modal-title">Điền Thông Tin</h4>
                 </div>
                 <div class="modal-body">
                     <form id="createBookForm">
@@ -74,7 +78,7 @@
                                     placeholder="vd: Bạch Ngọc Sách">
                             </div>
                         </div> --}}
-                        <input id="btnsubmit" type="submit" value="Submit">
+                        <input id="btnsubmit" type="submit" value="Xác Nhận">
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -114,6 +118,14 @@
         $(document).ready(function() {
 
             var dataTable = $('#myTable').DataTable({
+                // dom: 'Bfrtip',
+                buttons: [
+                    'copy', // Copy to clipboard
+                    'csv', // Export to CSV
+                    'excel', // Export to Excel
+                    'pdf', // Export to PDF
+                    'print', // Print button
+                ],
                 ajax: {
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -185,12 +197,20 @@
                     }, {
                         data: null,
                         render: function(data, type, row, meta) {
-                            return `<button class="btnUpdate" data-id="${row.id}" data-toggle="modal" data-target="#myModal">Update</button> 
-                            <button class="btnDelete" data-id="${row.id}">Delete</button>`;
+                            return `<button class="btnUpdate" data-id="${row.id}" data-toggle="modal" data-target="#myModal"><i class="fas fa-edit"></i></button> 
+                            <button class="btnDelete" data-id="${row.id}"><i class="fa fa-trash"></i></button>`;
                         }
                     }
 
-                ]
+                ],
+                paging: true,
+                lengthChange: true,
+                searching: true,
+                ordering: true,
+                info: false,
+                autoWidth: false,
+                responsive: true
+
             });
             $('#fromDate, #toDate').on('change', function() {
                 var fromDate = $('#fromDate').val();
@@ -235,12 +255,22 @@
             //
             function clearText() {
                 $('#id').val('');
-
-            }
+            } //
+            $('#xuatExcel').on('click', function() {
+                dataTable.button('.buttons-excel').trigger();
+            });
             $('#myTable').on('click', '.btnUpdate', function() {
                 $('#id').val($(this).data('id'));
+                var rowdata = dataTable.row($(this).parents('tr')).data();
+                $('#id_sach').val(rowdata.id_sach);
+                $('#id_sinhvien').val(rowdata.id_sinhvien);
+                $('#ngaymuon').val(rowdata.ngaymuon);
+                $('#ngaytra').val(rowdata.ngaytra);
+                $('#tinhtrang').val(rowdata.tinhtrang);
+                $('#modal-title').text('Cập Nhật');
             });
             $('#btnThem').click(function() {
+                $('#modal-title').text('Thêm Mới');
                 clearText();
             });
             //insert and update mượn trả
@@ -272,7 +302,7 @@
                     data: formdata,
                     success: function() {
                         Swal.fire({
-                            title: "Add success!!",
+                            title: "Success!!",
                             text: "You clicked the button!",
                             icon: "success"
                         });

@@ -20,8 +20,14 @@ class KhachHangController extends Controller
        $user=UserModel::all();
        return response()->json($user,200);
   }
-  public function getAllUser_api(){
-    $user=UserModel::all();
+  public function getAllUser_api(Request $request){
+    $query = UserModel::query();
+    if($request ->filled('sortField')){
+     $query->orderBy($request->sortField,$request->input('sortOrder','asc'));
+    }
+    $pageSize = $request->input('pageSize', 10);
+    $user = $query->paginate($pageSize, ['*'], 'page', $request->input('page', 1));
+
     return response()->json(['success'=>true,'data'=>$user,'message'=>'thành công']);
 }
 public function insert(Request $request) {

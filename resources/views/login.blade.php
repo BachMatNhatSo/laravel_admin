@@ -46,15 +46,21 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-8">
-                            <div class="icheck-primary">
-                                <input type="checkbox" id="remember">
-                                <label for="remember">
-                                    Remember Me
-                                </label>
-                            </div>
+                    <div class="input-group mb-3">
+                        <div class="captcha">
+                            <span>{!! captcha_img('mini') !!} </span>
+                            <button type="button" class="btn btn-danger reload" id="reload">&#x21bb;</button>
                         </div>
+                    </div>
+                    <div class="form-group mb-2">
+                        <input type="text" id="captcha" name="captcha" class="form-control" placeholder="Captcha"
+                            required>
+                        @error('captcha')
+                            <label for="" class="text-danger">{{ $message }}</label>
+                        @enderror
+                    </div>
+                    <div class="row">
+
                         <!-- /.col -->
                         <div class="col-4">
                             <button type="submit" id="btnsubmit" class="btn btn-primary btn-block">Sign In</button>
@@ -63,23 +69,6 @@
                     </div>
                 </form>
 
-                <div class="social-auth-links text-center mb-3">
-                    <p>- OR -</p>
-                    <a href="#" class="btn btn-block btn-primary">
-                        <i class="fab fa-facebook mr-2"></i> Sign in using Facebook
-                    </a>
-                    <a href="#" class="btn btn-block btn-danger">
-                        <i class="fab fa-google-plus mr-2"></i> Sign in using Google+
-                    </a>
-                </div>
-                <!-- /.social-auth-links -->
-
-                <p class="mb-1">
-                    <a href="forgot-password.html">I forgot my password</a>
-                </p>
-                <p class="mb-0">
-                    <a href="register.html" class="text-center">Register a new membership</a>
-                </p>
             </div>
             <!-- /.login-card-body -->
         </div>
@@ -95,11 +84,21 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function() {
+            function reloadCaptcha() {
+                $.ajax({
+                    type: 'GET',
+                    url: 'reloadCaptcha',
+                    success: function(data) {
+                        $(".captcha span").html(data.captcha);
+                    }
+                });
+            }
             $('#idtable').on('submit', function(e) {
                 e.preventDefault();
                 var formData = {
                     email: $('#email').val(),
-                    password: $('#password').val()
+                    password: $('#password').val(),
+                    captcha: $('#captcha').val(),
                 };
                 $.ajax({
                     headers: {
@@ -110,18 +109,57 @@
                     data: formData,
                     dataType: 'json',
                     success: function(response) {
-                        Swal.fire({
-                            title: "Login Success!!",
-                            text: "You clicked the button!",
-                            icon: "success"
-                        }).then(function() {
-                            window.location.href = '/';
-                        });
+                        if (response.message === 'Login successful') {
+                            Swal.fire({
+                                title: "Login Success!!",
+                                text: "You clicked the button!",
+                                icon: "success"
+                            }).then(function() {
+                                window.location.href = '/';
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Unexpected response',
+                                text: 'An unexpected response was received. Please try again.'
+                            });
+                        }
+                        // Reload captcha after form submission
+                        reloadCaptcha();
+                    },
+                    error: function(xhr, status, error) {
+                        if (xhr.responseJSON && xhr.responseJSON.errors && xhr.responseJSON
+                            .errors.captcha) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Login failed',
+                                text: 'The captcha entered is incorrect. Please try again.'
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Login failed',
+                                text: 'The account or password is incorrect, please try again!'
+                            });
+                        }
+                        // Reload captcha after form submission
+                        reloadCaptcha();
                     }
                 });
             });
+
+            // Reload captcha when reload button is clicked
+            $('#reload').click(function() {
+                reloadCaptcha();
+            });
+
         });
     </script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+
+
+
 </body>
 
 </html>
